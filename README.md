@@ -137,4 +137,4 @@ Sistema totalmente responsivo, funciona em desktop e mobile.
 - API REST completa
 
 ---
-**Desenvolvido para uso profissional em PDVs e distribuidoras.**
+**Este projeto possui caráter educacional e pode ser utilizado como base para estudos e aprimoramento técnico.**
