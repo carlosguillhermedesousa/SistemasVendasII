@@ -104,7 +104,7 @@
                     </div>
                 </div>
                 <div class="table-responsive table-scroll">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table table-hover align-middle mb-0 table-standard">
                         <thead class="table-header-fixed">
                             <tr>
                                 <th>Código</th>
@@ -153,6 +153,8 @@
     </div>
 </div>
 
+{% endblock %}
+
 {% block scripts %}
 <script>
 let productSearchTimeout;
@@ -169,13 +171,15 @@ function changeProductLimit() {
 
 document.getElementById('searchInput').addEventListener('input', function() {
     clearTimeout(productSearchTimeout);
-    productSearchTimeout = setTimeout(() => {
-        const search = this.value;
-        const url = new URL(window.location.href);
-        url.searchParams.set('search', search);
-        url.searchParams.set('page', 1);
-        window.location.href = url.toString();
-    }, 300);
+    const search = this.value;
+    if (search.length >= 2 || search.length === 0) {
+        productSearchTimeout = setTimeout(() => {
+            const url = new URL(window.location.href);
+            url.searchParams.set('search', search);
+            url.searchParams.set('page', 1);
+            window.location.href = url.toString();
+        }, 300);
+    }
 });
 
 function updatePrice() {
@@ -185,5 +189,4 @@ function updatePrice() {
     document.getElementById('price').value = price.toFixed(2);
 }
 </script>
-{% endblock %}
 {% endblock %}

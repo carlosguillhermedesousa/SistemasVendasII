@@ -253,10 +253,14 @@ select {
     background: rgba(56, 189, 248, 0.08);
 }
 
-.table th,
-.table td {
-    vertical-align: middle;
-    border-top: 1px solid rgba(71, 85, 105, 0.2);
+.table-standard {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-standard th,
+.table-standard td {
+    border-bottom: 1px solid rgba(71, 85, 105, 0.2);
 }
 
 .table thead th {
@@ -283,12 +287,13 @@ select {
     overflow-y: auto;
 }
 
-.table-header-fixed thead th {
+.table-header-fixed th {
     position: sticky;
     top: 0;
     z-index: 10;
-    background: rgba(71, 85, 105, 0.9);
+    background: rgba(71, 85, 105, 0.95);
     backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(71, 85, 105, 0.5);
 }
 
 .table td,
