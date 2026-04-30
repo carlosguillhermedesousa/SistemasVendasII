@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="page-heading"><i class="fas fa-chart-line"></i> Relatórios</h3>
+        <p class="text-muted">Análise rápida de vendas, clientes ativos e produtos mais vendidos.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-sm-6">
+        <div class="card py-4 px-4 text-center">
+            <div class="mb-3 text-muted">Vendas Finalizadas</div>
+            <h2 class="mb-0">{{ total_finalized }}</h2>
+        </div>
+    </div>
+    <div class="col-lg-3 col-sm-6">
+        <div class="card py-4 px-4 text-center">
+            <div class="mb-3 text-muted">Vendas Canceladas</div>
+            <h2 class="mb-0">{{ total_cancelled }}</h2>
+        </div>
+    </div>
+    <div class="col-lg-3 col-sm-6">
+        <div class="card py-4 px-4 text-center">
+            <div class="mb-3 text-muted">Receita</div>
+            <h2 class="mb-0">R$ {{ "%.2f"|format(revenue) }}</h2>
+        </div>
+    </div>
+    <div class="col-lg-3 col-sm-6">
+        <div class="card py-4 px-4 text-center">
+            <div class="mb-3 text-muted">Clientes Ativos</div>
+            <h2 class="mb-0">{{ active_clients }}</h2>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card border-0">
+            <div class="card-header bg-gradient-secondary text-white">
+                <h5 class="mb-0"><i class="fas fa-user-friends me-2"></i> Clientes com mais vendas</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-header-fixed">
+                            <tr>
+                                <th>Cliente</th>
+                                <th class="text-end">Quantidade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for client in top_clients %}
+                            <tr>
+                                <td>{{ client.client_name }}</td>
+                                <td class="text-end">{{ client.sale_count }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="2" class="text-muted">Nenhum cliente com vendas registradas.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card border-0">
+            <div class="card-header bg-gradient-secondary text-white">
+                <h5 class="mb-0"><i class="fas fa-boxes me-2"></i> Produtos mais vendidos</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-header-fixed">
+                            <tr>
+                                <th>Produto</th>
+                                <th class="text-end">Quantidade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in top_products %}
+                            <tr>
+                                <td>{{ product.product_name }}</td>
+                                <td class="text-end">{{ product.sold_quantity }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="2" class="text-muted">Nenhum produto vendido ainda.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-gradient-primary text-white">
+        <h5 class="mb-0"><i class="fas fa-filter"></i> Filtros de Relatório</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Data Inicial</label>
+                <input type="date" name="start_date" class="form-control" value="{{ start_date }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Data Final</label>
+                <input type="date" name="end_date" class="form-control" value="{{ end_date }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Cliente</label>
+                <input type="text" name="client_search" id="clientSearch" class="form-control" placeholder="Digite um ou mais clientes" value="{{ client_search }}">
+                <div class="form-text text-muted">Separe nomes com vírgula.</div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Produto</label>
+                <input type="text" name="product_search" id="productSearch" class="form-control" placeholder="Digite um ou mais produtos" value="{{ product_search }}">
+                <div class="form-text text-muted">Separe produtos com vírgula.</div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Categoria</label>
+                <input type="text" name="category_search" id="categorySearch" class="form-control" placeholder="Digite uma ou mais categorias" value="{{ category_search }}">
+                <div class="form-text text-muted">Separe categorias com vírgula.</div>
+            </div>
+            <div class="col-12 text-end">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search me-1"></i> Filtrar</button>
+                <a href="{{ url_for('main.reports') }}" class="btn btn-secondary ms-2"><i class="fas fa-times me-1"></i> Limpar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Filtered Sales Table -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-gradient-secondary text-white">
+        <h5 class="mb-0"><i class="fas fa-list"></i> Vendas Filtradas</h5>
+    </div>
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <div class="text-muted">Total de vendas: {{ total_sales }}</div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <label class="mb-0 text-muted">Mostrar</label>
+                <select id="salesPerPage" class="form-select form-select-sm" onchange="changeSalesLimit()">
+                    {% for option in [10,20,40,60,80,100] %}
+                    <option value="{{ option }}" {% if per_page == option %}selected{% endif %}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="table-responsive table-scroll">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-header-fixed">
+                    <tr>
+                        <th>ID</th>
+                        <th>Data</th>
+                        <th>Cliente</th>
+                        <th>Produtos</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sale in filtered_sales %}
+                    <tr>
+                        <td>{{ sale.id }}</td>
+                        <td>{{ sale.created_at }}</td>
+                        <td>{{ sale.client_name or 'Não informado' }}</td>
+                        <td>{{ sale.products or '-' }}</td>
+                        <td>R$ {{ "%.2f"|format(sale.total) }}</td>
+                        <td><span class="badge bg-{{ 'success' if sale.status == 'Finalizada' else 'danger' }}">{{ sale.status }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <nav>
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item {% if page == 1 %}disabled{% endif %}"><a class="page-link" href="{{ url_for('main.reports', start_date=start_date, end_date=end_date, client_search=client_search, product_search=product_search, category_search=category_search, page=page-1, per_page=per_page) }}">Anterior</a></li>
+                    {% for p in range(1, total_pages + 1) %}
+                    <li class="page-item {% if p == page %}active{% endif %}"><a class="page-link" href="{{ url_for('main.reports', start_date=start_date, end_date=end_date, client_search=client_search, product_search=product_search, category_search=category_search, page=p, per_page=per_page) }}">{{ p }}</a></li>
+                    {% endfor %}
+                    <li class="page-item {% if page == total_pages %}disabled{% endif %}"><a class="page-link" href="{{ url_for('main.reports', start_date=start_date, end_date=end_date, client_search=client_search, product_search=product_search, category_search=category_search, page=page+1, per_page=per_page) }}">Próxima</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+let reportsSearchTimeout;
+
+function changeSalesLimit() {
+    const perPage = document.getElementById('salesPerPage').value;
+    const url = new URL(window.location.href);
+    url.searchParams.set('per_page', perPage);
+    url.searchParams.set('page', 1);
+    window.location.href = url.toString();
+}
+
+function updateReportFilters() {
+    clearTimeout(reportsSearchTimeout);
+    reportsSearchTimeout = setTimeout(() => {
+        const url = new URL(window.location.href);
+        const clientSearch = document.getElementById('clientSearch') ? document.getElementById('clientSearch').value : '';
+        const productSearch = document.getElementById('productSearch') ? document.getElementById('productSearch').value : '';
+        const categorySearch = document.getElementById('categorySearch') ? document.getElementById('categorySearch').value : '';
+        url.searchParams.set('client_search', clientSearch);
+        url.searchParams.set('product_search', productSearch);
+        url.searchParams.set('category_search', categorySearch);
+        url.searchParams.set('page', 1);
+        window.location.href = url.toString();
+    }, 300);
+}
+
+const reportInputs = ['clientSearch', 'productSearch', 'categorySearch'];
+reportInputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('input', updateReportFilters);
+    }
+});
+</script>
+{% endblock %}

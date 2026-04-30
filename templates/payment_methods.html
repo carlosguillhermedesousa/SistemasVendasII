@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Formas de Pagamento{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="page-heading"><i class="fas fa-credit-card"></i> Formas de Pagamento</h3>
+        <p class="text-muted">Adicione e gerencie formas de pagamento ativas para o PDV.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-gradient-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-plus-circle"></i> Nova Forma</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Nome da Forma</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-control">
+                            <option value="Ativo">Ativo</option>
+                            <option value="Inativo">Inativo</option>
+                        </select>
+                    </div>
+                    <div class="text-end">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Cadastrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-gradient-secondary text-white">
+                <h5 class="mb-0"><i class="fas fa-list"></i> Métodos Cadastrados</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Status</th>
+                                <th class="text-end">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for method in methods %}
+                            <tr>
+                                <td>{{ method.name }}</td>
+                                <td><span class="badge bg-{{ 'success' if method.status == 'Ativo' else 'danger' }}">{{ method.status }}</span></td>
+                                <td class="text-end">
+                                    <a href="{{ url_for('main.toggle_payment_method', id=method.id) }}" class="btn btn-sm btn-{{ 'warning' if method.status == 'Ativo' else 'success' }}">
+                                        <i class="fas fa-{{ 'ban' if method.status == 'Ativo' else 'check' }}"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

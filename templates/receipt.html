@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Comprovante de Venda{% endblock %}
+
+{% block content %}
+<div id="receipt" class="receipt-print">
+    <div class="text-center mb-4">
+        <h4>EletroTech Distribuidora</h4>
+        <p class="mb-2">Comprovante de Venda</p>
+        <hr>
+    </div>
+    <div class="mb-3">
+        <strong>Data/Hora:</strong> {{ sale.created_at }}
+    </div>
+    {% if sale.client_name %}
+    <div class="mb-3">
+        <strong>Cliente:</strong> {{ sale.client_name }}
+    </div>
+    {% endif %}
+    <hr>
+    <h6 class="mb-3">Itens</h6>
+    {% for item in items %}
+    <div class="d-flex justify-content-between mb-2">
+        <div>
+            <strong>{{ item.name }}</strong>
+            <div>{{ item.quantity }} x R$ {{ "%.2f"|format(item.price) }}</div>
+        </div>
+        <strong>R$ {{ "%.2f"|format(item.price * item.quantity) }}</strong>
+    </div>
+    {% endfor %}
+    <hr>
+    {% if sale.discount > 0 %}
+    {% set total_bruto = sale.total / (1 - sale.discount / 100) %}
+    {% set desconto_valor = total_bruto - sale.total %}
+    <div class="d-flex justify-content-between mb-2">
+        <span>Subtotal</span>
+        <span>R$ {{ "%.2f"|format(total_bruto) }}</span>
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+        <span>Desconto ({{ "%.0f"|format(sale.discount) }}%)</span>
+        <span>-R$ {{ "%.2f"|format(desconto_valor) }}</span>
+    </div>
+    {% endif %}
+    <div class="d-flex justify-content-between py-2">
+        <span class="h6 mb-0">Total</span>
+        <span class="h5 mb-0">R$ {{ "%.2f"|format(sale.total) }}</span>
+    </div>
+    <div class="d-flex justify-content-between mb-2">
+        <span>Total Pago</span>
+        <strong>R$ {{ "%.2f"|format(paid) }}</strong>
+    </div>
+    {% if change > 0 %}
+    <div class="d-flex justify-content-between mb-3">
+        <span>Troco</span>
+        <strong>R$ {{ "%.2f"|format(change) }}</strong>
+    </div>
+    {% endif %}
+    <h6 class="mb-3">Pagamentos</h6>
+    {% for payment in payments %}
+    <div class="d-flex justify-content-between mb-2">
+        <span>{{ payment.name }}</span>
+        <strong>R$ {{ "%.2f"|format(payment.amount) }}</strong>
+    </div>
+    {% endfor %}
+    {% if 'PIX' in payments|map(attribute='name') %}
+    <div class="text-center my-4">
+        <h6 class="mb-3">QR Code PIX</h6>
+        <img id="qrCodeImg" src="" alt="QR Code PIX" style="max-width: 220px;">
+        <p class="small mt-2">Chave PIX: 63992254255</p>
+    </div>
+    <script>
+    fetch(`/generate_qr/{{ "%.2f"|format(sale.total) }}`).then(r => r.json()).then(d => document.getElementById('qrCodeImg').src = d.qr);
+    </script>
+    {% endif %}
+    <div class="text-center mt-4">
+        <p>Obrigado pela preferência!</p>
+    </div>
+</div>
+
+<script>
+window.print();
+</script>
+{% endblock %}
+
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #receipt, #receipt * {
+        visibility: visible;
+    }
+    #receipt {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        font-size: 14px;
+    }
+}
+.receipt-print {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+    color: black;
+}
+</style>

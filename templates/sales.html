@@ -1,0 +1,10 @@
+<h2>Vendas</h2>
+<form method="POST">
+<select name="product_id">
+{% for p in products %}
+<option value="{{p.id}}">{{p.name}} ({{p.stock}})</option>
+{% endfor %}
+</select>
+<input name="qty" placeholder="Quantidade">
+<button>Vender</button>
+</form>

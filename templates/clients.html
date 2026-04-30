@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}Clientes{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="page-heading"><i class="fas fa-users"></i> Clientes</h3>
+        <p class="text-muted">Gerencie cadastro, status e histórico de clientes com segurança.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-user-plus"></i> Novo Cliente</h5>
+                <button class="btn btn-outline-light btn-sm collapse-toggle-btn" type="button" data-bs-toggle="collapse" data-bs-target="#clientForm" aria-expanded="false" aria-controls="clientForm">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+            <div class="collapse" id="clientForm">
+                <div class="card-body">
+                <form method="POST">
+                    <div class="row gy-3">
+                        <div class="col-12">
+                            <label class="form-label">Nome Completo</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">CPF/CNPJ</label>
+                            <input type="text" name="cpf" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Telefone</label>
+                            <input type="text" name="phone" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Sexo</label>
+                            <select name="gender" class="form-select">
+                                <option value="Masculino">Masculino</option>
+                                <option value="Feminino">Feminino</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Status</label>
+                            <select name="status" class="form-select">
+                                <option value="Ativo">Ativo</option>
+                                <option value="Inativo">Inativo</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">CEP</label>
+                            <div class="input-group">
+                                <input type="text" name="cep" id="cep" class="form-control" placeholder="00000-000">
+                                <button type="button" id="searchCep" class="btn btn-secondary">Buscar CEP</button>
+                            </div>
+                            <div id="cepFeedback" class="form-text text-danger"></div>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Rua/Logradouro</label>
+                            <input type="text" name="street" id="street" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Número</label>
+                            <input type="text" name="number" id="number" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Bairro</label>
+                            <input type="text" name="neighborhood" id="neighborhood" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Cidade</label>
+                            <input type="text" name="city" id="city" class="form-control">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Estado</label>
+                            <input type="text" name="state" id="state" class="form-control">
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Cadastrar Cliente</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-gradient-secondary text-white">
+                <h5 class="mb-0"><i class="fas fa-list"></i> Clientes Cadastrados</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="text" id="searchInput" placeholder="Buscar clientes..." class="form-control form-control-sm" value="{{ search }}" style="width: 300px;">
+                        <div class="text-muted">Total de clientes: {{ total_clients }}</div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="mb-0 text-muted">Mostrar</label>
+                        <select id="clientPerPage" class="form-select form-select-sm" onchange="changeClientLimit()">
+                            {% for option in [10,20,40,60,80,100] %}
+                            <option value="{{ option }}" {% if per_page == option %}selected{% endif %}>{{ option }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="table-responsive table-scroll">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-header-fixed">
+                            <tr>
+                                <th>Nome</th>
+                                <th>CPF</th>
+                                <th>Telefone</th>
+                                <th>Sexo</th>
+                                <th>Status</th>
+                                <th>Endereço</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for client in clients %}
+                            <tr>
+                                <td>{{ client.name }}</td>
+                                <td>{{ client.cpf }}</td>
+                                <td>{{ client.phone or '-' }}</td>
+                                <td>{{ client.gender or '-' }}</td>
+                                <td><span class="badge bg-{{ 'success' if client.status == 'Ativo' else 'danger' }}">{{ client.status }}</span></td>
+                                <td>{{ client.street or client.address or '-' }}, {{ client.number or '-' }} - {{ client.neighborhood or '-' }}, {{ client.city or '-' }}/{{ client.state or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item {% if page == 1 %}disabled{% endif %}"><a class="page-link" href="{{ url_for('main.clients', page=page-1, per_page=per_page) }}">Anterior</a></li>
+                            {% for p in range(1, total_pages + 1) %}
+                            <li class="page-item {% if p == page %}active{% endif %}"><a class="page-link" href="{{ url_for('main.clients', page=p, per_page=per_page) }}">{{ p }}</a></li>
+                            {% endfor %}
+                            <li class="page-item {% if page == total_pages %}disabled{% endif %}"><a class="page-link" href="{{ url_for('main.clients', page=page+1, per_page=per_page) }}">Próxima</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let cepTimeout;
+let clientSearchTimeout;
+
+function changeClientLimit() {
+    const perPage = document.getElementById('clientPerPage').value;
+    const url = new URL(window.location.href);
+    url.searchParams.set('per_page', perPage);
+    url.searchParams.set('page', 1);
+    window.location.href = url.toString();
+}
+
+document.getElementById('searchInput').addEventListener('input', function() {
+    clearTimeout(clientSearchTimeout);
+    clientSearchTimeout = setTimeout(() => {
+        const search = this.value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('search', search);
+        url.searchParams.set('page', 1);
+        window.location.href = url.toString();
+    }, 300);
+});
+
+async function lookupCep() {
+    const cepInput = document.getElementById('cep');
+    const feedback = document.getElementById('cepFeedback');
+    feedback.textContent = '';
+    const cep = cepInput.value.trim().replace(/\D/g, '');
+    if (!cep) {
+        feedback.textContent = 'Informe um CEP válido para buscar o endereço.';
+        return;
+    }
+
+    const lookupUrl = "{{ url_for('main.lookup_cep', cep='00000000') }}";
+    try {
+        const response = await fetch(lookupUrl.replace('00000000', cep));
+        const data = await response.json();
+
+        if (data.error) {
+            feedback.textContent = data.error;
+            return;
+        }
+
+        // Preencher campos automaticamente
+        document.getElementById('street').value = data.logradouro || '';
+        document.getElementById('neighborhood').value = data.bairro || '';
+        document.getElementById('city').value = data.localidade || '';
+        document.getElementById('state').value = data.uf || '';
+        document.getElementById('number').focus();
+    } catch (error) {
+        console.error(error);
+        feedback.textContent = 'Erro ao buscar o CEP. Tente novamente.';
+    }
+}
+
+document.getElementById('searchCep').addEventListener('click', lookupCep);
+document.getElementById('cep').addEventListener('input', function() {
+    clearTimeout(cepTimeout);
+    cepTimeout = setTimeout(lookupCep, 500);
+});
+document.getElementById('cep').addEventListener('blur', function() {
+    if (this.value.trim()) {
+        lookupCep();
+    }
+});
+document.getElementById('cep').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        lookupCep();
+    }
+});
+</script>
+{% endblock %}
